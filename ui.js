@@ -1,5 +1,32 @@
 import { formatIsoDate } from "./utils.js";
 
+export function initAddBookFormView(actions) {
+  const form = document.querySelector(".add-book-form");
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+    const title = formData.get('title');
+    const authors = formData.get('authors').split(",");
+    const pages = formData.get('pages');
+    const read = formData.get('read');
+    let cover = formData.get('cover');
+    
+    if (!cover || cover.size === 0) {
+      cover = null;
+    }
+
+    const bookData = { title, authors, pages, read, cover };
+
+    if (actions && actions.onSubmit) {
+      actions.onSubmit(bookData);
+    }
+
+    form.reset();
+});
+}
+
 export function createBookCard(book, actions) {
   const wrapper = document.createElement("li");
   wrapper.className = "book-card";

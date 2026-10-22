@@ -28,21 +28,21 @@ body {
   padding: var(--space-6) var(--space-4) var(--space-8);
 }
 
-/* ---- Views: "My Shelf" by default, "Contribute" when the URL is #contribute ---- */
+/* ---- Views: "My Shelf" by default, "Add-book" when the URL is #add-book ---- */
 .view {
   /* Big offset so jumping to a view never scrolls the header out of sight */
   scroll-margin-block-start: 30rem;
 }
 
-#contribute {
+#add-book {
   display: none;
 }
 
-#contribute:target {
+#add-book:target {
   display: block;
 }
 
-.app:has(#contribute:target) #shelf {
+.app:has(#add-book:target) #shelf {
   display: none;
 }
 

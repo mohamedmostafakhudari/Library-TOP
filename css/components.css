@@ -216,8 +216,8 @@
 /* Highlight the menu item of the view that is currently showing.
    The views are switched with :target, so this lives in the .app scope. */
 @scope (.app) {
-  :scope:not(:has(#contribute:target)) .nav-link[href="#shelf"],
-  :scope:has(#contribute:target) .nav-link[href="#contribute"] {
+  :scope:not(:has(#add-book:target)) .nav-link[href="#shelf"],
+  :scope:has(#add-book:target) .nav-link[href="#add-book"] {
     color: var(--color-text-main);
   }
 }
@@ -563,9 +563,9 @@
 
 
 /* --------------------------------------------------------------------------
-   Contribute form
+  Add book form
    -------------------------------------------------------------------------- */
-@scope (.contribute-form) {
+@scope (.add-book-form) {
   :scope {
     display: grid;
     gap: var(--space-8);

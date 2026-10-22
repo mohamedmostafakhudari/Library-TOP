@@ -64,8 +64,9 @@ Library.prototype.getBooks = function() {
   return [...this.books];
 }
 
-Library.prototype.addBookToLibrary = function(newBook) {
-  // code to add new book
+Library.prototype.addBookToLibrary = function(bookData) {
+  const newBook = new Book(bookData.title, bookData.authors, bookData.pages, bookData.read, bookData.cover);
+  this.books = this.books.concat(newBook);
 }
 
 Library.prototype.removeBook = function(bookId) {
