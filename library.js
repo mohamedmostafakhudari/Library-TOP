@@ -1,4 +1,4 @@
-const books = [
+const initialBooks = [
   {
     id: 1,
     title: "Don’t Make Me Think",
@@ -54,3 +54,36 @@ const books = [
     addedOn: "2026-10-21T16:45:00",
   },
 ];
+
+export default function Library(books = initialBooks) {
+  if (!new.target) throw new Error("'new' operator is missing!");
+  this.books = books;
+}
+
+Library.prototype.getBooks = function() {
+  return [...this.books];
+}
+
+Library.prototype.addBookToLibrary = function(newBook) {
+  // code to add new book
+}
+
+Library.prototype.removeBook = function(bookId) {
+  // code to remove book
+}
+function Book(title, authors, pages, read = false, cover = null) {
+  if (!new.target) throw Error("'new' operator missing!");
+  this.id = crypto.randomUUID();
+  this.title = title;
+  this.authors = authors;
+  this.pages = pages;
+  this.read = read;
+  this.cover = cover;
+  this.addedOn = new Date().toISOString();
+}
+
+Book.prototype.toggleReadStatus = function() {
+  // code to toggle read status of a book
+}
+
+// const book = new Book('The Hobbit', 'J.R.R. Tolkien', 295);
