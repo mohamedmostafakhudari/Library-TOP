@@ -17,19 +17,12 @@ function handleToggleReadStatus(cardId) {
 }
 
 function renderApp() {
-  const bookGrid = document.querySelector(".book-grid");
   const books = library.getBooks();
 
-  bookGrid.innerHTML = '';
-  
-  books.forEach(bookData => {
-    const cardElement = ui.createBookCard(bookData, {
-      onDelete: () => handleDeleteCard(bookData.id),
-      onToggleReadStatus: () => handleToggleReadStatus(bookData.id),
+  ui.renderBookList(books, {
+      onDelete: (id) => handleDeleteCard(id),
+      onToggleReadStatus: (id) => handleToggleReadStatus(id),
     });
-
-    bookGrid.appendChild(cardElement);
-  });
 }
 
 

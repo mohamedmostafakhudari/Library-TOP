@@ -26,8 +26,18 @@ export function initAddBookFormView(actions) {
     form.reset();
 });
 }
+export function renderBookList(books, actions) {
+    const bookGrid = document.querySelector(".book-grid");
 
-export function createBookCard(book, actions) {
+    bookGrid.innerHTML = '';
+    
+    books.forEach(bookData => {
+        const cardElement = createBookCard(bookData, actions);
+        bookGrid.appendChild(cardElement);
+    });
+}
+
+function createBookCard(book, actions) {
   const wrapper = document.createElement("li");
   wrapper.className = "book-card";
   wrapper.setAttribute("data-read", book.read);
@@ -61,12 +71,12 @@ export function createBookCard(book, actions) {
   
   btnStatus.addEventListener("click", () => {
     if (actions && actions.onToggleReadStatus) {
-      actions.onToggleReadStatus();
+      actions.onToggleReadStatus(book.id);
     }
   });
   wrapper.querySelector(".btn-delete").addEventListener('click', () => {
     if (actions && actions.onDelete) {
-      actions.onDelete();
+      actions.onDelete(book.id);
     }
   });
 
