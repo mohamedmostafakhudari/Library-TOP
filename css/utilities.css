@@ -1,0 +1,18 @@
+.breakout-full {
+  margin-left: calc(50% - var(--container-width, 100vw) / 2);
+  margin-right: calc(50% - var(--container-width, 100vw) / 2);
+}
+
+.flow > * + * {
+  margin-top: var(--flow-gap, 16px);
+}
+
+.container {
+  width: calc(100% - 3rem);
+  max-width: 900px;
+  margin-inline: auto;
+}
+
+.text-transform-none {
+  text-transform: none;
+}

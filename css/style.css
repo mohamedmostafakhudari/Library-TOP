@@ -1,0 +1,72 @@
+/* ==========================================================================
+   style.css — page layout and view switching
+   Mobile-first (640px / 1024px / 1280px breakpoints).
+   ========================================================================== */
+
+body {
+  padding: var(--space-3);
+}
+
+.app {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  max-inline-size: 120rem;
+  margin-inline: auto;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background-color: var(--color-background);
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.content {
+  flex: 1;
+  padding: var(--space-6) var(--space-4) var(--space-8);
+}
+
+/* ---- Views: "My Shelf" by default, "Contribute" when the URL is #contribute ---- */
+.view {
+  /* Big offset so jumping to a view never scrolls the header out of sight */
+  scroll-margin-block-start: 30rem;
+}
+
+#contribute {
+  display: none;
+}
+
+#contribute:target {
+  display: block;
+}
+
+.app:has(#contribute:target) #shelf {
+  display: none;
+}
+
+@media (min-width: 40rem) {
+  body {
+    padding: var(--space-6);
+  }
+
+  .content {
+    padding-inline: var(--space-6);
+  }
+}
+
+@media (min-width: 64rem) {
+  body {
+    padding: var(--space-8);
+  }
+
+  .app {
+    grid-template-columns: 19.125rem minmax(0, 1fr);
+    min-block-size: calc(100vh - 2 * var(--space-8));
+  }
+
+  .content {
+    padding: var(--space-8) var(--space-12) var(--space-12);
+  }
+}
