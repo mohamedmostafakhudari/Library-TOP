@@ -46,8 +46,9 @@ export function initBookGrid(actions) {
 		// catch the delegated click events on the card elements and any element nested inside them and run the handling callback functions
 		const card = e.target.closest(".book-card");
 		if (!card) return;
-		if (e.target.closest(".btn-delete")) actions.onDelete(card.dataset.id);
-		if (e.target.closest(".btn-status"))
+		if (e.target.closest(".btn-delete")) {
+			actions.onDelete(card.dataset.id);
+		} else if (e.target.closest(".btn-status"))
 			actions.onToggleReadStatus(card.dataset.id);
 	});
 }
@@ -92,26 +93,29 @@ export function renderBookList(books) {
 	});
 }
 
-export function hideLoading() {
-	const appStatus = document.querySelector(".loading-state");
-	appStatus.style.display = "none";
-}
-
 export function showLoading() {
-	const appStatus = document.querySelector(".loading-state");
-	appStatus.firstElementChild.textContent = "Loading...";
-	appStatus.style.display = "block";
+	setStatus("Loading...");
 }
 
 export function showLoadError() {
-	const appStatus = document.querySelector(".loading-state");
-	appStatus.firstElementChild.textContent =
-		"Something went wrong, couldn't load the books.";
-	appStatus.style.display = "block";
+	setStatus("Something went wrong, couldn't load the books.");
 }
 
+export function hideStatus() {
+	document.querySelector(".app-status").hidden = true;
+}
+
+let toastTimer;
 export function showMessage(msg) {
-	const appStatus = document.querySelector(".loading-state");
-	appStatus.firstElementChild.textContent = msg;
-	appStatus.style.display = "block";
+	const el = document.querySelector(".toast");
+	el.textContent = msg;
+	el.hidden = false;
+	clearTimeout(toastTimer);
+	toastTimer = setTimeout(() => (el.hidden = true), 5000);
+}
+
+function setStatus(text) {
+	const el = document.querySelector(".app-status");
+	el.textContent = text;
+	el.hidden = false;
 }

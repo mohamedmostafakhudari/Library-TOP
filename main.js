@@ -14,7 +14,7 @@ function render() {
 	if (status === "loading") return ui.showLoading();
 	if (status === "failed") return ui.showLoadError();
 
-	ui.hideLoading();
+	ui.hideStatus();
 	ui.renderBookList(library.getBooks());
 }
 
