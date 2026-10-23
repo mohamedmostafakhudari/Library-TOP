@@ -28,6 +28,10 @@ function renderApp() {
 }
 
 
+ui.initBookGrid({
+  onDelete: (id) => handleDeleteCard(id),
+  onToggleReadStatus: (id) => handleToggleReadStatus(id),
+});
 ui.initAddBookFormView({
   onSubmit: handleSubmitBookData 
 });
