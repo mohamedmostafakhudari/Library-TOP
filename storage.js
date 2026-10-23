@@ -4,7 +4,8 @@ const STORE = "books";
 function openDb() {
 	return new Promise((resolve, reject) => {
 		const req = indexedDB.open(DB_NAME, 1);
-		req.onupgradeneeded = () => req.result.createObjectStore(STORE);
+		req.onupgradeneeded = () =>
+			req.result.createObjectStore(STORE, { keyPath: "id" });
 		req.onsuccess = () => resolve(req.result);
 		req.onerror = () => reject(req.error);
 	});
