@@ -19,6 +19,7 @@ function promisify(request) {
 }
 
 export async function getAllBooks() {
+	// we need to create array of Book instances after storage retrival because IndexedDB uses structured cloning, so what comes back is plain objects with no prototype or methods
 	const db = await openDb();
 	return promisify(db.transaction(STORE).objectStore(STORE).getAll());
 }

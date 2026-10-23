@@ -1,5 +1,44 @@
 import { formatIsoDate } from "./utils.js";
 
+function createBookCard(book) {
+	const wrapper = document.createElement("li");
+	wrapper.className = "book-card";
+	wrapper.setAttribute("data-read", book.read);
+	wrapper.setAttribute("data-id", book.id);
+	wrapper.innerHTML = `
+              <div class="cover"><svg class="icon"><use href="#i-book"/></svg></div>
+              <div class="meta">
+                <h3 class="title"></h3>
+                <p class="author"></p>
+                <p class="pages"></p>
+              </div>
+              <div class="details">
+                <div class="added">
+                  <p class="label">Added on</p>
+                  <time class="value" datetime=""></time>
+                </div>
+                <div class="actions">
+                  <button class="btn btn-status" type="button"></button>
+                  <button class="btn btn-outline btn-delete" type="button">Remove</button>
+                </div>
+              </div>
+  `;
+
+	wrapper.querySelector(".title").textContent = book.title;
+	wrapper.querySelector(".author").textContent = book.authors.join(", ");
+	wrapper.querySelector(".pages").textContent = book.pages + " pages";
+
+	const time = wrapper.querySelector("time");
+	time.setAttribute("datetime", book.addedOn);
+	time.textContent = formatIsoDate(book.addedOn);
+
+	wrapper.querySelector(".btn-status").textContent = book.read
+		? "Read"
+		: "Not Read Yet";
+
+	return wrapper;
+}
+
 export function initBookGrid(actions) {
 	const bookGrid = document.querySelector(".book-grid");
 
@@ -42,52 +81,37 @@ export function initAddBookFormView(actions) {
 	});
 }
 
-export function renderBookList(books, actions) {
+export function renderBookList(books) {
 	const bookGrid = document.querySelector(".book-grid");
 
 	bookGrid.innerHTML = "";
 
 	books.forEach((bookData) => {
-		const cardElement = createBookCard(bookData, actions);
+		const cardElement = createBookCard(bookData);
 		bookGrid.appendChild(cardElement);
 	});
 }
 
-function createBookCard(book) {
-	const wrapper = document.createElement("li");
-	wrapper.className = "book-card";
-	wrapper.setAttribute("data-read", book.read);
-	wrapper.setAttribute("data-id", book.id);
-	wrapper.innerHTML = `
-              <div class="cover"><svg class="icon"><use href="#i-book"/></svg></div>
-              <div class="meta">
-                <h3 class="title"></h3>
-                <p class="author"></p>
-                <p class="pages"></p>
-              </div>
-              <div class="details">
-                <div class="added">
-                  <p class="label">Added on</p>
-                  <time class="value" datetime=""></time>
-                </div>
-                <div class="actions">
-                  <button class="btn btn-status" type="button"></button>
-                  <button class="btn btn-outline btn-delete" type="button">Remove</button>
-                </div>
-              </div>
-  `;
+export function hideLoading() {
+	const appStatus = document.querySelector(".loading-state");
+	appStatus.style.display = "none";
+}
 
-	wrapper.querySelector(".title").textContent = book.title;
-	wrapper.querySelector(".author").textContent = book.authors.join(", ");
-	wrapper.querySelector(".pages").textContent = book.pages + " pages";
+export function showLoading() {
+	const appStatus = document.querySelector(".loading-state");
+	appStatus.firstElementChild.textContent = "Loading...";
+	appStatus.style.display = "block";
+}
 
-	const time = wrapper.querySelector("time");
-	time.setAttribute("datetime", book.addedOn);
-	time.textContent = formatIsoDate(book.addedOn);
+export function showLoadError() {
+	const appStatus = document.querySelector(".loading-state");
+	appStatus.firstElementChild.textContent =
+		"Something went wrong, couldn't load the books.";
+	appStatus.style.display = "block";
+}
 
-	wrapper.querySelector(".btn-status").textContent = book.read
-		? "Read"
-		: "Not Read Yet";
-
-	return wrapper;
+export function showMessage(msg) {
+	const appStatus = document.querySelector(".loading-state");
+	appStatus.firstElementChild.textContent = msg;
+	appStatus.style.display = "block";
 }

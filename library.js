@@ -58,6 +58,8 @@ Library.prototype.getBooks = function () {
 Library.prototype.addBookToLibrary = function (bookData) {
 	const newBook = new Book(bookData);
 	this.books = this.books.concat(newBook);
+
+	return newBook;
 };
 
 Library.prototype.deleteBook = function (bookId) {
@@ -67,4 +69,9 @@ Library.prototype.deleteBook = function (bookId) {
 Library.prototype.toggleReadStatus = function (bookId) {
 	const book = this.books.find((b) => b.id === bookId);
 	if (book) book.toggleReadStatus();
+};
+
+Library.prototype.getBookById = function (id) {
+	const book = this.books.find((b) => b.id === id);
+	if (book) return book;
 };
