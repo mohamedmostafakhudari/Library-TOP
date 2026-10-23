@@ -43,7 +43,6 @@ const initialBooks = [
   },
 ].map(obj => new Book(obj.title, obj.authors, obj.pages, obj.read, obj.cover));
 
-// console.log(initialBooks);
 export default function Library(books = initialBooks) {
   if (!new.target) throw new Error("'new' operator is missing!");
   this.books = books;
@@ -63,13 +62,10 @@ Library.prototype.removeBook = function(bookId) {
 }
 
 Library.prototype.toggleReadStatus = function(bookId) {
-  this.books = this.books.map(function(book) {
-    if (book.id === bookId) {
-      book.toggleReadStatus(book.read);
-    }
-    return book;
-  })
+  const book = this.books.find(b => b.id === bookId);
+  if (book) book.toggleReadStatus();
 }
+
 function Book(title, authors, pages, read = false, cover = null) {
   if (!new.target) throw Error("'new' operator missing!");
   this.id = crypto.randomUUID();
@@ -81,8 +77,8 @@ function Book(title, authors, pages, read = false, cover = null) {
   this.addedOn = new Date().toISOString();
 }
 
-Book.prototype.toggleReadStatus = function(oldReadStatus) {
-  this.read = !oldReadStatus;
+Book.prototype.toggleReadStatus = function() {
+  this.read = !this.read;
 }
 
 // const book = new Book('The Hobbit', 'J.R.R. Tolkien', 295);
