@@ -29,18 +29,24 @@ async function persist(action) {
 }
 
 async function addBook(bookData) {
+	if (status !== "ready") return;
+
 	const book = library.addBookToLibrary(bookData);
 	render(); // optimistic: UI updates instantly
 	await persist(() => storage.saveBook(book));
 }
 
 async function deleteBook(bookId) {
+	if (status !== "ready") return;
+
 	library.deleteBook(bookId);
 	render();
 	await persist(() => storage.deleteBook(bookId));
 }
 
 async function toggleReadStatus(bookId) {
+	if (status !== "ready") return;
+
 	library.toggleReadStatus(bookId);
 	render();
 	await persist(() => storage.saveBook(library.getBookById(bookId)));
@@ -49,11 +55,22 @@ async function toggleReadStatus(bookId) {
 async function init() {
 	render(); // draw the loading state
 
+	/* 1. wire listeners up */
+	// it's best practice to wire listeners first thing before the application finishes loading to prevent race consitions and missed events.
+
+	ui.initBookGrid({
+		onDelete: deleteBook,
+		onToggleReadStatus: toggleReadStatus,
+	});
+	ui.initAddBookFormView({
+		onSubmit: addBook,
+	});
+
 	try {
-		/* 1. load */
+		/* 2. load */
 		const stored = await storage.getAllBooks();
 
-		/* 2. rebuild */
+		/* 3. rebuild */
 		library = new Library(stored.map((b) => new Book(b)));
 		status = "ready";
 	} catch (err) {
@@ -62,15 +79,6 @@ async function init() {
 		render();
 		return;
 	}
-
-	/* 3. wire up */
-	ui.initBookGrid({
-		onDelete: deleteBook,
-		onToggleReadStatus: toggleReadStatus,
-	});
-	ui.initAddBookFormView({
-		onSubmit: addBook,
-	});
 
 	/* 4. render */
 	render();
