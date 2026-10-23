@@ -9,7 +9,8 @@ function handleSubmitBookData(bookData) {
 }
 
 function handleDeleteCard(cardId) {
-  // code to instruct state to delete book and update ui
+  library.removeBook(cardId);
+  renderApp();
 }
 
 function handleToggleReadStatus(cardId) {

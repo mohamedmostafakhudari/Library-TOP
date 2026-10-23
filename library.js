@@ -70,7 +70,7 @@ Library.prototype.addBookToLibrary = function(bookData) {
 }
 
 Library.prototype.removeBook = function(bookId) {
-  // code to remove book
+  this.books = this.books.filter(book => book.id !== bookId);
 }
 function Book(title, authors, pages, read = false, cover = null) {
   if (!new.target) throw Error("'new' operator missing!");
