@@ -1,61 +1,64 @@
 import { formatIsoDate } from "./utils.js";
 
 export function initBookGrid(actions) {
-  const bookGrid = document.querySelector(".book-grid");
-  
-  bookGrid.addEventListener('click', (e) => {
-    // catch the delegated click events on the card elements and any element nested inside them and run the handling callback functions
-    const card = e.target.closest(".book-card");
-    if (!card) return;
-    if (e.target.closest('.btn-delete')) actions.onDelete(card.dataset.id);
-    if (e.target.closest('.btn-status')) actions.onToggleReadStatus(card.dataset.id);
-  })
+	const bookGrid = document.querySelector(".book-grid");
+
+	bookGrid.addEventListener("click", (e) => {
+		// catch the delegated click events on the card elements and any element nested inside them and run the handling callback functions
+		const card = e.target.closest(".book-card");
+		if (!card) return;
+		if (e.target.closest(".btn-delete")) actions.onDelete(card.dataset.id);
+		if (e.target.closest(".btn-status"))
+			actions.onToggleReadStatus(card.dataset.id);
+	});
 }
 
 export function initAddBookFormView(actions) {
-  const form = document.querySelector(".add-book-form");
+	const form = document.querySelector(".add-book-form");
 
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
+	form.addEventListener("submit", (e) => {
+		e.preventDefault();
 
-    const formData = new FormData(form);
-    const title = formData.get('title');
-    const authors = formData.get('authors').split(", ").map(a => a.trim()).filter(Boolean);
-    const pages = Number(formData.get('pages'));
-    const read = formData.get('read') === 'on';
-    let cover = formData.get('cover');
-    
-    if (!cover || cover.size === 0) {
-      cover = null;
-    }
+		const formData = new FormData(form);
+		const title = formData.get("title");
+		const authors = formData
+			.get("authors")
+			.split(", ")
+			.map((a) => a.trim())
+			.filter(Boolean);
+		const pages = Number(formData.get("pages"));
+		const read = formData.get("read") === "on";
+		let cover = formData.get("cover");
 
-    const bookData = { title, authors, pages, read, cover };
+		if (!cover || cover.size === 0) {
+			cover = null;
+		}
 
-    if (actions && actions.onSubmit) {
-      actions.onSubmit(bookData);
-    }
+		const bookData = { title, authors, pages, read, cover };
 
-    form.reset();
-});
+		actions.onSubmit?.(bookData);
+
+		form.reset();
+	});
 }
 
 export function renderBookList(books, actions) {
-    const bookGrid = document.querySelector(".book-grid");
+	const bookGrid = document.querySelector(".book-grid");
 
-    bookGrid.innerHTML = '';
-    
-    books.forEach(bookData => {
-        const cardElement = createBookCard(bookData, actions);
-        bookGrid.appendChild(cardElement);
-    });
+	bookGrid.innerHTML = "";
+
+	books.forEach((bookData) => {
+		const cardElement = createBookCard(bookData, actions);
+		bookGrid.appendChild(cardElement);
+	});
 }
 
 function createBookCard(book) {
-  const wrapper = document.createElement("li");
-  wrapper.className = "book-card";
-  wrapper.setAttribute("data-read", book.read);
-  wrapper.setAttribute("data-id", book.id);
-  wrapper.innerHTML = `
+	const wrapper = document.createElement("li");
+	wrapper.className = "book-card";
+	wrapper.setAttribute("data-read", book.read);
+	wrapper.setAttribute("data-id", book.id);
+	wrapper.innerHTML = `
               <div class="cover"><svg class="icon"><use href="#i-book"/></svg></div>
               <div class="meta">
                 <h3 class="title"></h3>
@@ -74,15 +77,17 @@ function createBookCard(book) {
               </div>
   `;
 
-  wrapper.querySelector(".title").textContent = book.title;
-  wrapper.querySelector(".author").textContent = book.authors.join(", ");
-  wrapper.querySelector(".pages").textContent = book.pages + ' pages';
-  
-  const time = wrapper.querySelector("time");
-  time.setAttribute("datetime", book.addedOn);
-  time.textContent = formatIsoDate(book.addedOn);
+	wrapper.querySelector(".title").textContent = book.title;
+	wrapper.querySelector(".author").textContent = book.authors.join(", ");
+	wrapper.querySelector(".pages").textContent = book.pages + " pages";
 
-  wrapper.querySelector(".btn-status").textContent = book.read ? "Read" : "Not Read Yet";
+	const time = wrapper.querySelector("time");
+	time.setAttribute("datetime", book.addedOn);
+	time.textContent = formatIsoDate(book.addedOn);
 
-  return wrapper;
+	wrapper.querySelector(".btn-status").textContent = book.read
+		? "Read"
+		: "Not Read Yet";
+
+	return wrapper;
 }

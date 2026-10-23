@@ -4,69 +4,69 @@
    ========================================================================== */
 
 body {
-  padding: var(--space-3);
+	padding: var(--space-3);
 }
 
 .app {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  max-inline-size: 120rem;
-  margin-inline: auto;
-  overflow: hidden;
-  border-radius: var(--radius-xl);
-  background-color: var(--color-background);
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	max-inline-size: 120rem;
+	margin-inline: auto;
+	overflow: hidden;
+	border-radius: var(--radius-xl);
+	background-color: var(--color-background);
 }
 
 .main {
-  display: flex;
-  flex-direction: column;
-  min-inline-size: 0;
+	display: flex;
+	flex-direction: column;
+	min-inline-size: 0;
 }
 
 .content {
-  flex: 1;
-  padding: var(--space-6) var(--space-4) var(--space-8);
+	flex: 1;
+	padding: var(--space-6) var(--space-4) var(--space-8);
 }
 
 /* ---- Views: "My Shelf" by default, "Add-book" when the URL is #add-book ---- */
 .view {
-  /* Big offset so jumping to a view never scrolls the header out of sight */
-  scroll-margin-block-start: 30rem;
+	/* Big offset so jumping to a view never scrolls the header out of sight */
+	scroll-margin-block-start: 30rem;
 }
 
 #add-book {
-  display: none;
+	display: none;
 }
 
 #add-book:target {
-  display: block;
+	display: block;
 }
 
 .app:has(#add-book:target) #shelf {
-  display: none;
+	display: none;
 }
 
 @media (min-width: 40rem) {
-  body {
-    padding: var(--space-6);
-  }
+	body {
+		padding: var(--space-6);
+	}
 
-  .content {
-    padding-inline: var(--space-6);
-  }
+	.content {
+		padding-inline: var(--space-6);
+	}
 }
 
 @media (min-width: 64rem) {
-  body {
-    padding: var(--space-8);
-  }
+	body {
+		padding: var(--space-8);
+	}
 
-  .app {
-    grid-template-columns: 19.125rem minmax(0, 1fr);
-    min-block-size: calc(100vh - 2 * var(--space-8));
-  }
+	.app {
+		grid-template-columns: 19.125rem minmax(0, 1fr);
+		min-block-size: calc(100vh - 2 * var(--space-8));
+	}
 
-  .content {
-    padding: var(--space-8) var(--space-12) var(--space-12);
-  }
+	.content {
+		padding: var(--space-8) var(--space-12) var(--space-12);
+	}
 }
