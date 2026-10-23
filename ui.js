@@ -8,9 +8,9 @@ export function initAddBookFormView(actions) {
 
     const formData = new FormData(form);
     const title = formData.get('title');
-    const authors = formData.get('authors').split(",");
-    const pages = formData.get('pages');
-    const read = formData.get('read');
+    const authors = formData.get('authors').split(",").map(a => a.trim().filter(Boolean));
+    const pages = Number(formData.get('pages'));
+    const read = formData.get('read') === 'on';
     let cover = formData.get('cover');
     
     if (!cover || cover.size === 0) {
@@ -61,7 +61,7 @@ function createBookCard(book, actions) {
               </div>
   `;
   wrapper.querySelector(".title").textContent = book.title;
-  wrapper.querySelector(".author").textContent = book.authors.join(",");
+  wrapper.querySelector(".author").textContent = book.authors.join(", ");
   wrapper.querySelector(".pages").textContent = book.pages + ' pages';
   const time = wrapper.querySelector("time");
   time.setAttribute("datetime", book.addedOn);
