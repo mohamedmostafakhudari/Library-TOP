@@ -8,7 +8,8 @@ export function initAddBookFormView(actions) {
 
     const formData = new FormData(form);
     const title = formData.get('title');
-    const authors = formData.get('authors').split(",").map(a => a.trim().filter(Boolean));
+    console.log(formData.get('authors').split(", "));
+    const authors = formData.get('authors').split(", ").map(a => a.trim()).filter(Boolean);
     const pages = Number(formData.get('pages'));
     const read = formData.get('read') === 'on';
     let cover = formData.get('cover');
