@@ -38,6 +38,7 @@ export function initAddBookFormView(actions) {
     form.reset();
 });
 }
+
 export function renderBookList(books, actions) {
     const bookGrid = document.querySelector(".book-grid");
 

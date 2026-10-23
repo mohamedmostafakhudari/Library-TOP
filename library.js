@@ -1,3 +1,5 @@
+import Book from "./book.js";
+
 const initialBooks = [
   {
     title: "Don’t Make Me Think",
@@ -64,19 +66,4 @@ Library.prototype.removeBook = function(bookId) {
 Library.prototype.toggleReadStatus = function(bookId) {
   const book = this.books.find(b => b.id === bookId);
   if (book) book.toggleReadStatus();
-}
-
-function Book({ title, authors, pages, read = false, cover = null }) {
-  if (!new.target) throw Error("'new' operator missing!");
-  this.id = crypto.randomUUID();
-  this.title = title;
-  this.authors = authors;
-  this.pages = pages;
-  this.read = read;
-  this.cover = cover;
-  this.addedOn = new Date().toISOString();
-}
-
-Book.prototype.toggleReadStatus = function() {
-  this.read = !this.read;
 }
