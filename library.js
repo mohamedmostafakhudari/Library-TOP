@@ -46,32 +46,37 @@ const initialBooks = [
 	},
 ].map((bookData) => new Book(bookData));
 
-export default function Library(books = initialBooks) {
-	if (!new.target) throw new Error("'new' operator is missing!");
-	this.books = books;
+class Library {
+	books = initialBooks;
+
+	constructor({ books = initialBooks }) {
+		this.books = books;
+	}
+
+	getBooks() {
+		return [...this.books];
+	}
+
+	addBookToLibrary(bookData) {
+		const newBook = new Book(bookData);
+		this.books = this.books.concat(newBook);
+
+		return newBook;
+	}
+
+	deleteBook(bookId) {
+		this.books = this.books.filter((book) => book.id !== bookId);
+	}
+
+	toggleReadStatus(bookId) {
+		const book = this.books.find((b) => b.id === bookId);
+		if (book) book.toggleReadStatus();
+	}
+
+	getBookById(id) {
+		const book = this.books.find((b) => b.id === id);
+		if (book) return book;
+	}
 }
 
-Library.prototype.getBooks = function () {
-	return [...this.books];
-};
-
-Library.prototype.addBookToLibrary = function (bookData) {
-	const newBook = new Book(bookData);
-	this.books = this.books.concat(newBook);
-
-	return newBook;
-};
-
-Library.prototype.deleteBook = function (bookId) {
-	this.books = this.books.filter((book) => book.id !== bookId);
-};
-
-Library.prototype.toggleReadStatus = function (bookId) {
-	const book = this.books.find((b) => b.id === bookId);
-	if (book) book.toggleReadStatus();
-};
-
-Library.prototype.getBookById = function (id) {
-	const book = this.books.find((b) => b.id === id);
-	if (book) return book;
-};
+export default Library;
