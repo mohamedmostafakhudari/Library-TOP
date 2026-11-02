@@ -1,51 +1,4 @@
 import Book from "./book.js";
-import * as storage from "./storage.js";
-
-const initialBooks = [
-	{
-		title: "Don’t Make Me Think",
-		authors: ["Steve Krug"],
-		pages: 216,
-		read: true,
-		cover: null,
-	},
-	{
-		title: "The Design of Everyday Things",
-		authors: ["Don Norman"],
-		pages: 368,
-		read: false,
-		cover: null,
-	},
-	{
-		title:
-			"Sprint: How to Solve Big Problems and Test New Ideas in Just Five Days",
-		authors: ["Jake Knapp", "John Zeratsky", "Braden Kowitz"],
-		pages: 288,
-		read: false,
-		cover: null,
-	},
-	{
-		title: "You Don’t Know JS: Scope & Closures",
-		authors: ["Kyle Simpson"],
-		pages: 98,
-		read: true,
-		cover: null,
-	},
-	{
-		title: "Rich Dad Poor Dad",
-		authors: ["Robert T. Kiyosaki"],
-		pages: 336,
-		read: true,
-		cover: null,
-	},
-	{
-		title: "Learn UX: Design Great Products with Lean UX",
-		authors: ["Jeff Gothelf"],
-		pages: 240,
-		read: false,
-		cover: null,
-	},
-].map((bookData) => new Book(bookData));
 
 class Library {
 	constructor(storage) {
@@ -60,25 +13,30 @@ class Library {
 
 	subscribe(observer) {
 		this.observers.push(observer);
+		return () => {
+			this.observers = this.observers.filter((o) => o !== observer);
+		};
 	}
 
 	notify() {
-		this.observers.forEach((observer) => observer(this.state));
+		const snapshot = this.getState();
+		this.observers.forEach((observer) => observer(snapshot));
 	}
 
 	async fetchBooks() {
 		this.state.isLoading = true;
+		this.state.error = null;
+		this.notify();
 
 		try {
-			const data = await storage.getAllBooks();
-			this.state.books = data;
-			this.state.isLoading = false;
-
-			return this.state.books;
+			const books = await this.storage.getAllBooks();
+			this.state.books = books.map((book) => new Book(book));
 		} catch (error) {
 			this.state.error = error.message;
-			this.state.isLoading = false;
 			throw error;
+		} finally {
+			this.state.isLoading = false;
+			this.notify();
 		}
 	}
 
@@ -92,13 +50,15 @@ class Library {
 	}
 
 	async addBookToLibrary(bookData) {
+		this.state.error = null;
+
 		const newBook = new Book(bookData);
 
 		// snapshot current state in case a rollback needed
 		const previousState = [...this.state.books];
 
 		// instantly update local state & trigger immediate render
-		this.state.books.push(newBook);
+		this.state.books = [...this.state.books, newBook];
 		this.notify();
 
 		try {
@@ -113,6 +73,7 @@ class Library {
 	}
 
 	async deleteBook(bookId) {
+		this.state.error = null;
 		// snapshot current state in case a rollback needed
 		const previousState = [...this.state.books];
 
@@ -132,19 +93,33 @@ class Library {
 	}
 
 	async toggleReadStatus(bookId) {
+		this.state.error = null;
 		// snapshot current state in case a rollback needed
-		const previousState = [...this.state.books];
+		const previousState = structuredClone(this.state.books);
 
 		// instantly update local state & trigger immediate render
-		const book = this.state.books.find((b) => b.id === bookId);
+		let targetBook = null;
 
-		if (!book) throw new Error("book not found");
+		this.state.books = this.state.books.map((b) => {
+			if (b.id === bookId) {
+				// creates a clone and keeps the prototype methods of the original book working for the clone aswell
+				console.log(Object.getPrototypeOf(b));
+				const clonedBook = Object.create(
+					Object.getPrototypeOf(b),
+					Object.getOwnPropertyDescriptors(b),
+				);
+				clonedBook.toggleReadStatus();
+				targetBook = clonedBook; // keeps a reference for the storage save
+				return clonedBook;
+			}
+			return b;
+		});
+		if (!targetBook) throw new Error("book not found");
 
-		book.toggleReadStatus();
 		this.notify();
 
 		try {
-			await this.storage.saveBook(book);
+			await this.storage.saveBook(targetBook);
 		} catch (error) {
 			this.state.error = error.message;
 			// rolling back...
@@ -163,7 +138,7 @@ class Library {
 	}
 
 	getState() {
-		return { ...this.state };
+		return { ...this.state, books: [...this.state.books] };
 	}
 }
 

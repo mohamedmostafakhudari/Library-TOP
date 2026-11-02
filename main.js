@@ -1,7 +1,6 @@
-import * as ui from "./ui.js";
-import * as storage from "./storage.js";
+import LibraryView from "./ui.js";
 import Library from "./library.js";
-import Book from "./book.js";
+import * as storage from "./storage.js";
 
 class LibraryController {
 	constructor(model, view) {
@@ -16,7 +15,7 @@ class LibraryController {
 		// it's best practice to wire listeners first thing before the application finishes loading to prevent race consitions and missed events.
 
 		this.model.subscribe((libraryState) => {
-			this.view.renderBookList(libraryState.books);
+			this.view.render(libraryState);
 		});
 
 		this.view.initBookGrid({
@@ -27,35 +26,45 @@ class LibraryController {
 			onSubmit: this.handleAddBook.bind(this),
 		});
 
-		this.view.showLoading();
-
 		try {
 			await this.model.fetchBooks();
-
-			this.view.hideStatus();
-			this.view.renderBookList(this.model.getBooks());
 		} catch (error) {
-			this.view.showError(error.message);
+			this.view.showMessage(error.message);
 		}
 	}
 
 	async handleAddBook(bookData) {
 		if (this.model.isLoading()) return;
 
-		await this.model.addBookToLibrary(bookData);
+		try {
+			await this.model.addBookToLibrary(bookData);
+			return true;
+		} catch (error) {
+			this.view.showMessage(error.message);
+		}
 	}
 
 	async handleDeleteBook(bookId) {
 		if (this.model.isLoading()) return;
 
-		await this.model.deleteBook(bookId);
+		try {
+			await this.model.deleteBook(bookId);
+		} catch (error) {
+			this.view.showMessage(error.message);
+		}
 	}
 
 	async handleToggleReadStatus(bookId) {
 		if (this.model.isLoading()) return;
-
-		await this.model.toggleReadStatus(bookId);
+		try {
+			await this.model.toggleReadStatus(bookId);
+		} catch (error) {
+			this.view.showMessage(error.message);
+		}
 	}
 }
 
-const app = new LibraryController(new Library(storage), ui);
+const app = new LibraryController(
+	new Library(storage),
+	new LibraryView(document.getElementById("app")),
+);

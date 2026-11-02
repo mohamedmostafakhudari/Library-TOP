@@ -1,11 +1,18 @@
 import { formatIsoDate } from "./utils.js";
 
-function createBookCard(book) {
-	const wrapper = document.createElement("li");
-	wrapper.className = "book-card";
-	wrapper.setAttribute("data-read", book.read);
-	wrapper.setAttribute("data-id", book.id);
-	wrapper.innerHTML = `
+class LibraryView {
+	#toastTimer = null;
+
+	constructor(container) {
+		this.container = container;
+	}
+
+	#createBookCard(book) {
+		const wrapper = document.createElement("li");
+		wrapper.className = "book-card";
+		wrapper.setAttribute("data-read", book.read);
+		wrapper.setAttribute("data-id", book.id);
+		wrapper.innerHTML = `
               <div class="cover"><svg class="icon"><use href="#i-book"/></svg></div>
               <div class="meta">
                 <h3 class="title"></h3>
@@ -18,104 +25,124 @@ function createBookCard(book) {
                   <time class="value" datetime=""></time>
                 </div>
                 <div class="actions">
-                  <button class="btn btn-status" type="button"></button>
-                  <button class="btn btn-outline btn-delete" type="button">Remove</button>
+                  <button class="btn btn-status" type="button" data-action="toggleRead"></button>
+                  <button class="btn btn-outline btn-delete" type="button"
+										data-action="delete">Remove</button>
                 </div>
               </div>
   `;
 
-	wrapper.querySelector(".title").textContent = book.title;
-	wrapper.querySelector(".author").textContent = book.authors.join(", ");
-	wrapper.querySelector(".pages").textContent = book.pages + " pages";
+		wrapper.querySelector(".title").textContent = book.title;
+		wrapper.querySelector(".author").textContent = book.authors.join(", ");
+		wrapper.querySelector(".pages").textContent = book.pages + " pages";
 
-	const time = wrapper.querySelector("time");
-	time.setAttribute("datetime", book.addedOn);
-	time.textContent = formatIsoDate(book.addedOn);
+		const time = wrapper.querySelector("time");
+		time.setAttribute("datetime", book.addedOn);
+		time.textContent = formatIsoDate(book.addedOn);
 
-	wrapper.querySelector(".btn-status").textContent = book.read
-		? "Read"
-		: "Not Read Yet";
+		wrapper.querySelector(".btn-status").textContent = book.read
+			? "Read"
+			: "Not Read Yet";
 
-	return wrapper;
+		return wrapper;
+	}
+
+	#bindSubmitListener(callback) {
+		const form = this.container.querySelector(".add-book-form");
+
+		form.addEventListener("submit", (e) => {
+			e.preventDefault();
+
+			const formData = new FormData(form);
+			const title = formData.get("title");
+			const authors = formData
+				.get("authors")
+				.split(",")
+				.map((a) => a.trim())
+				.filter(Boolean);
+			const pages = Number(formData.get("pages"));
+			const read = formData.get("read") === "on";
+			let cover = formData.get("cover");
+
+			if (!cover || cover.size === 0) {
+				cover = null;
+			}
+
+			const bookData = { title, authors, pages, read, cover };
+
+			callback(bookData).then(() => {
+				form.reset();
+			});
+		});
+	}
+
+	#renderBookList(books) {
+		const bookGrid = this.container.querySelector(".book-grid");
+
+		bookGrid.innerHTML = "";
+
+		books.forEach((bookData) => {
+			const cardElement = this.#createBookCard(bookData);
+			bookGrid.appendChild(cardElement);
+		});
+	}
+
+	#showLoading() {
+		const bookGrid = this.container.querySelector(".book-grid");
+		bookGrid.textContent = "Loading ...";
+	}
+
+	#showError(errorMsg) {
+		const appStatus = this.container.querySelector(".app-status");
+		appStatus.textContent = errorMsg;
+		appStatus.hidden = false;
+	}
+
+	#hideStatus() {
+		const appStatus = this.container.querySelector(".app-status");
+		appStatus.hidden = true;
+	}
+
+	initBookGrid(actions) {
+		// map each data-action value to its handler
+		const handlers = {
+			toggleRead: actions.onToggleReadStatus,
+			delete: actions.onDelete,
+		};
+
+		const bookGrid = this.container.querySelector(".book-grid");
+
+		bookGrid.addEventListener("click", (e) => {
+			const button = e.target.closest("[data-action]");
+			if (!button) return;
+
+			const card = button.closest(".book-card");
+			if (!card) return;
+
+			const handler = handlers[button.dataset.action];
+			if (handler) handler(card.dataset.id);
+		});
+	}
+
+	initAddBookFormView(actions) {
+		this.#bindSubmitListener(actions.onSubmit);
+	}
+
+	render(state) {
+		if (state.isLoading) return this.#showLoading();
+		if (state.error) return this.#showError(state.error);
+
+		this.#hideStatus();
+		this.#renderBookList(state.books);
+	}
+
+	showMessage(msg) {
+		const toast = this.container.querySelector(".toast");
+		toast.textContent = msg;
+		toast.hidden = false;
+		clearTimeout(this.#toastTimer);
+		this.#toastTimer = setTimeout(() => (toast.hidden = true), 5000);
+	}
 }
 
-export function initBookGrid(actions) {
-	const bookGrid = document.querySelector(".book-grid");
-
-	bookGrid.addEventListener("click", (e) => {
-		// catch the delegated click events on the card elements and any element nested inside them and run the handling callback functions
-		const card = e.target.closest(".book-card");
-		if (!card) return;
-		if (e.target.closest(".btn-delete")) {
-			actions.onDelete(card.dataset.id);
-		} else if (e.target.closest(".btn-status"))
-			actions.onToggleReadStatus(card.dataset.id);
-	});
-}
-
-export function initAddBookFormView(actions) {
-	const form = document.querySelector(".add-book-form");
-
-	form.addEventListener("submit", (e) => {
-		e.preventDefault();
-
-		const formData = new FormData(form);
-		const title = formData.get("title");
-		const authors = formData
-			.get("authors")
-			.split(",")
-			.map((a) => a.trim())
-			.filter(Boolean);
-		const pages = Number(formData.get("pages"));
-		const read = formData.get("read") === "on";
-		let cover = formData.get("cover");
-
-		if (!cover || cover.size === 0) {
-			cover = null;
-		}
-
-		const bookData = { title, authors, pages, read, cover };
-
-		actions.onSubmit?.(bookData);
-
-		form.reset();
-	});
-}
-
-export function renderBookList(books) {
-	const bookGrid = document.querySelector(".book-grid");
-
-	bookGrid.innerHTML = "";
-
-	books.forEach((bookData) => {
-		const cardElement = createBookCard(bookData);
-		bookGrid.appendChild(cardElement);
-	});
-}
-
-export function showLoading() {
-	setStatus("Loading...");
-}
-
-export function showLoadError() {
-	setStatus("Something went wrong, couldn't load the books.");
-}
-
-export function hideStatus() {
-	document.querySelector(".app-status").hidden = true;
-}
-
-let toastTimer;
-export function showMessage(msg) {
-	const el = document.querySelector(".toast");
-	el.textContent = msg;
-	el.hidden = false;
-	clearTimeout(toastTimer);
-	toastTimer = setTimeout(() => (el.hidden = true), 5000);
-}
-
-function setStatus(text) {
-	const el = document.querySelector(".app-status");
-	el.textContent = text;
-	el.hidden = false;
-}
+export default LibraryView;
