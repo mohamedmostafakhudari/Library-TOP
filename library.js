@@ -1,4 +1,5 @@
 import Book from "./book.js";
+import * as storage from "./storage.js";
 
 const initialBooks = [
 	{
@@ -47,35 +48,122 @@ const initialBooks = [
 ].map((bookData) => new Book(bookData));
 
 class Library {
-	books = initialBooks;
+	constructor(storage) {
+		this.storage = storage;
+		this.state = {
+			books: [],
+			isLoading: false,
+			error: null,
+		};
+		this.observers = []; // used to notify the controller/view of changes
+	}
 
-	constructor({ books = initialBooks }) {
-		this.books = books;
+	subscribe(observer) {
+		this.observers.push(observer);
+	}
+
+	notify() {
+		this.observers.forEach((observer) => observer(this.state));
+	}
+
+	async fetchBooks() {
+		this.state.isLoading = true;
+
+		try {
+			const data = await storage.getAllBooks();
+			this.state.books = data;
+			this.state.isLoading = false;
+
+			return this.state.books;
+		} catch (error) {
+			this.state.error = error.message;
+			this.state.isLoading = false;
+			throw error;
+		}
 	}
 
 	getBooks() {
-		return [...this.books];
-	}
-
-	addBookToLibrary(bookData) {
-		const newBook = new Book(bookData);
-		this.books = this.books.concat(newBook);
-
-		return newBook;
-	}
-
-	deleteBook(bookId) {
-		this.books = this.books.filter((book) => book.id !== bookId);
-	}
-
-	toggleReadStatus(bookId) {
-		const book = this.books.find((b) => b.id === bookId);
-		if (book) book.toggleReadStatus();
+		return [...this.state.books];
 	}
 
 	getBookById(id) {
-		const book = this.books.find((b) => b.id === id);
+		const book = this.state.books.find((b) => b.id === id);
 		if (book) return book;
+	}
+
+	async addBookToLibrary(bookData) {
+		const newBook = new Book(bookData);
+
+		// snapshot current state in case a rollback needed
+		const previousState = [...this.state.books];
+
+		// instantly update local state & trigger immediate render
+		this.state.books.push(newBook);
+		this.notify();
+
+		try {
+			await this.storage.saveBook(newBook);
+		} catch (error) {
+			this.state.error = error.message;
+			// rolling back...
+			this.state.books = previousState;
+			this.notify();
+			throw error; // let controller know so it can show an error toast
+		}
+	}
+
+	async deleteBook(bookId) {
+		// snapshot current state in case a rollback needed
+		const previousState = [...this.state.books];
+
+		// instantly update local state & trigger immediate render
+		this.state.books = this.state.books.filter((book) => book.id !== bookId);
+		this.notify();
+
+		try {
+			await this.storage.deleteBook(bookId);
+		} catch (error) {
+			this.state.error = error.message;
+			// rolling back...
+			this.state.books = previousState;
+			this.notify();
+			throw error; // let controller know so it can show an error toast
+		}
+	}
+
+	async toggleReadStatus(bookId) {
+		// snapshot current state in case a rollback needed
+		const previousState = [...this.state.books];
+
+		// instantly update local state & trigger immediate render
+		const book = this.state.books.find((b) => b.id === bookId);
+
+		if (!book) throw new Error("book not found");
+
+		book.toggleReadStatus();
+		this.notify();
+
+		try {
+			await this.storage.saveBook(book);
+		} catch (error) {
+			this.state.error = error.message;
+			// rolling back...
+			this.state.books = previousState;
+			this.notify();
+			throw error; // let controller know so it can show an error toast
+		}
+	}
+
+	isLoading() {
+		return this.state.isLoading;
+	}
+
+	hasError() {
+		return this.state.error !== null;
+	}
+
+	getState() {
+		return { ...this.state };
 	}
 }
 

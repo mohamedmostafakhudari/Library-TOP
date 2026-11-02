@@ -24,6 +24,11 @@ export async function getAllBooks() {
 	return promisify(db.transaction(STORE).objectStore(STORE).getAll());
 }
 
+export async function getBookById(id) {
+	const db = await openDb();
+	return promisify(db.transaction(STORE).objectStore(STORE).get(id));
+}
+
 export async function saveBook(book) {
 	const db = await openDb();
 	return promisify(
